@@ -1,0 +1,20 @@
+{
+  "name": "exp",
+  "version": "1.0.0",
+  "description": "前端工作经验总结",
+  "main": "index.js",
+  "author": "q.chen",
+  "license": "MIT",
+  "scripts": {
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
+  },
+  "devDependencies": {
+    "@vuepress/plugin-active-header-links": "^1.5.2",
+    "@vuepress/plugin-back-to-top": "^1.5.2",
+    "@vuepress/plugin-nprogress": "^1.5.2",
+    "pug": "^3.0.0",
+    "pug-plain-loader": "^1.0.0",
+    "vuepress": "^1.5.2"
+  }
+}
