@@ -261,7 +261,7 @@ rem 本质上就是个等比缩放
 
 **左侧 px布局，右侧rem布局；肉眼可见的，在相同大小的屏幕上，px布局能展示更多的信息，rem布局等比缩放，信息量较少**
 
-![rem和px对比.png](https://ftp.bmp.ovh/imgs/2020/08/fd2d3f6a88d37567.png)
+![rem和px对比.png](https://raw.githubusercontent.com/Nick-QI/pics/master/1597832399547-1597832399543.png)
 
 :::tip
 
@@ -275,7 +275,7 @@ rem 本质上就是个等比缩放
 
 ## 微信ios端底部导航栏
 
-> <img src="https://ftp.bmp.ovh/imgs/2020/08/3f0c9fdddb93de8e.png" alt="图" style="zoom:20%;" />
+> <img src="https://raw.githubusercontent.com/Nick-QI/pics/master/1597832370146-1597832370128.png" alt="图" style="zoom:20%;" />
 
 **出现原因：** 当存在历史记录栈的时候, ios 底部会出现导航bar
 
@@ -328,7 +328,7 @@ rem 本质上就是个等比缩放
 >
 > [微信js-sdk文档](https://developers.weixin.qq.com/doc/offiaccount/OA_Web_Apps/JS-SDK.html)
 
-![重点](https://ftp.bmp.ovh/imgs/2020/08/3efb84b0255fe5b7.png)
+![重点](https://raw.githubusercontent.com/Nick-QI/pics/master/1597832346227-1597832346222.png)
 
 **根据上面的信息和踩过的坑，总结出：** 
 
@@ -349,7 +349,7 @@ ios 在首次进入的时候，要保存初次进入的url，用这个url去请�
 
 ## IOS中new Date的坑
 
-![safari表现](https://ftp.bmp.ovh/imgs/2020/08/4d4347c5976e4b30.png)
+![safari表现](https://raw.githubusercontent.com/Nick-QI/pics/master/1597832322393-1597832322384.png)
 
 ```js
 new Date('2020-12-11 08:09') // 这种带时间的在safari中是无法解析的
@@ -434,10 +434,33 @@ ios android 均支持scheme协议跳转；
 
 2. **ios 通过 universal link 跳转（ios 9以上）**
 
-   ![流程图](https://ftp.bmp.ovh/imgs/2020/08/51285e223fac2751.png)
+   ![流程图](https://raw.githubusercontent.com/Nick-QI/pics/master/1597832281067-appjump.jpeg)
 
 
 
 ## 老生常谈，事件循环 EventLoop
 
-![](https://ftp.bmp.ovh/imgs/2020/08/548c50db2d9ab663.png)
+![event loop](https://raw.githubusercontent.com/Nick-QI/pics/master/1597832224340-eventloop.jpeg)
+
+
+
+## html2canvas 坑点
+
+1. ios 13 版本中无法生成图片，android 和 pc端均正常，将html2canvas版本降级为 "html2canvas": "1.0.0-rc.4"
+
+
+
+## CPU,GPU天梯图
+
+![GPU天梯图](https://raw.githubusercontent.com/Nick-QI/pics/master/1597831917871-gpu2020.jpg)
+
+![cpu天梯图](https://raw.githubusercontent.com/Nick-QI/pics/master/1597831881445-cpu2020.jpg)
+
+
+
+## 魔方magic
+
+![魔方](https://raw.githubusercontent.com/Nick-QI/pics/master/1597831693551-1597831693427-cube.png)
+
+
+
