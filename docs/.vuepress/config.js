@@ -8,36 +8,16 @@ module.exports = {
     lastUpdated: 'Last Updated',
     smoothScroll: true,
     displayAllHeaders: true, // 默认值：false
-    sidebar:
-      [
-        {
-          title: '日常',
-          path: '/base/',
-          children: [
-          ]
-        },
-        {
-          title: 'React Enjoy',
-          path: '/react/',
-          children: [
-
-          ]
-        },
-        {
-          title: 'Vue Enjoy',
-          path: '/vue/',
-          children: [
-
-          ]
-        },
-        {
-          title: 'Webpack Enjoy',
-          path: '/webpack/',
-          children: [
-
-          ]
-        }
-      ]
+    // sidebarDepth: 2,
+    sidebar: {
+      '/base/': [
+        'base',
+        'html',
+        'css',
+        'react',
+        'hobby'
+      ],
+    }
   },
   // permalink: "/:year/:month/:day/:slug",
   configureWebpack: {

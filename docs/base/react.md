@@ -1,6 +1,15 @@
 ---
-title: React Enjoy
+title: react
 ---
+
+## 为什么大厂都在走React方向？
+
+1. 历史遗留均为react技术栈，无法切换过来新的技术栈
+2. react真香？html in js 我不是觉得很香
+3. react hooks 香
+4. 函数式编程导致？
+
+
 
 ## 为什么需要this绑定？
 
