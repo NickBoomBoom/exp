@@ -328,11 +328,31 @@ ios android 均支持scheme协议跳转；
 
 ## 函数式编程，是个人都能看懂的函数式编程
 
-::: detail like this
+<iframe src='https://zh.wikipedia.org/wiki/函数式编程' width='100%' height='1000px'> </iframe>
 
-```js
-man().eat(food)
-```
+[（转）详细说明](https://zhuanlan.zhihu.com/p/28712866)
+
+[《函数式编程指北》](https://llh911001.gitbooks.io/mostly-adequate-guide-chinese/content/ch1.html)
+
+::: tip
+
+很奇怪，上个世纪50年代发明的；近几年左右忽然流行起来，概念兴起，具体实践的话，也没咋在网络和知识平台看到大厂鼓吹。
+
+感觉是个骗kpi的说辞。
+
+个人整体感受下来，这种编程在教学方面应该能省不少力。
+
+实践方面，类似于上述文献所说，函数式编程具有的特点之一： **没有"副作用"(单一职责，只做一件事，避免耦合关联。**
+
+那么，在我处理复杂嵌套对象（即引用类型）的时候，我需要前置深度clone一个新对象出来，然后在继续往下执行，最后将新对象返回回去。
+
+现在大多是vue，react等响应式框架，数据与视图双向绑定。
+
+react： 返回一个新的数据对象的话，对react影响不大，去setState时会去比较的
+
+vue2.0：众所周知，vue2.0对深度嵌套对象是未绑定监听的，需要手动去调用$set来通知视图更新。
+
+vue3.0； proxy 会在修改之前就进行拦截，还行
 
 :::
 

@@ -2,11 +2,130 @@
 title: CSS
 ---
 
+## 可c，常用css样式表
+
+1. 常用
+
+```less
+.ellipsis(@line: 1) {
+  overflow          : hidden;
+  /*文字超出用省略号*/
+  text-overflow     : ellipsis;
+  /*盒子模型*/
+  display           : -webkit-box;
+  /*子元素的垂直排列方式*/
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: @line;
+}
+
+.center {
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+}
+
+.center-between {
+  display        : flex;
+  align-items    : center;
+  justify-content: space-between;
+}
+
+.bottom-1px(@color: #edeef2) {
+  position: relative;
+  border  : none;
+
+  &::before {
+    content         : "";
+    display         : block;
+    width           : 200%;
+    height          : 2px;
+    position        : absolute;
+    bottom          : 0;
+    left            : 0;
+    right           : 0;
+    background-color: @color;
+    transform-origin: left top;
+    transform       : scale(0.5);
+  }
+}
+
+.border-1px(@color: #fefefe, @radius: 0px) {
+  border       : none;
+  position     : relative;
+  border-radius: @radius;
+
+  &::after {
+    content         : "";
+    position        : absolute;
+    top             : 0;
+    left            : 0;
+    border          : 1px solid @color;
+    border-radius   : calc(@radius * 2);
+    box-sizing      : border-box;
+    width           : 200%;
+    height          : 200%;
+    transform       : scale(0.5);
+    transform-origin: left top;
+  }
+}
+
+.top-1px(@color: #edeef2) {
+  position: relative;
+  border  : none;
+
+  &::before {
+    content         : "";
+    display         : block;
+    width           : 200%;
+    height          : 2px;
+    position        : absolute;
+    top             : 0;
+    left            : 0;
+    right           : 0;
+    background-color: @color;
+    transform-origin: left top;
+    transform       : scale(0.5);
+  }
+}
+
+.bottom(@bottom) when (@bottom > 0) {
+  bottom        : calc(@bottom);
+  -webkit-bottom: calc(constant(safe-area-inset-bottom)+ @bottom);
+  -webkit-bottom: calc(env(safe-area-inset-bottom)+ @bottom);
+}
+
+.bottom(@bottom) when (@bottom =0) {
+  bottom        : @bottom;
+  -webkit-bottom: calc(constant(safe-area-inset-bottom));
+  -webkit-bottom: calc(env(safe-area-inset-bottom));
+}
+
+.clearfix {
+  zoom: 1;
+
+  &::after {
+    content   : '';
+    display   : block;
+    /*让生成的元素以块级元素显示，占满剩余空间*/
+    height    : 0;
+    /*避免生成的内容破坏原有布局高度*/
+    clear     : both;
+    /*清除浮动*/
+    visibility: hidden;
+    /*让生成的内容不可见*/
+  }
+}
+```
+
+
+
 ## calc 坑点
+
   ```css
     bottom: calc(var(--x) + 0px);
     // calc 中计算为 0px 时是不会生效的.
   ```
+
 
 
 ## fixed 定位失效
@@ -28,45 +147,48 @@ transform: none;
 >
 > 根据实际情况修改，没有绝对的银弹
 
-```css
+```less
 /* 1px 问题解决 */
 
 /* 盒子边框 */
-.borderRadius-1px {
-    border: none;
-    position: relative;
-}
+.border-1px(@color: #fefefe, @radius: 0px) {
+  border       : none;
+  position     : relative;
+  border-radius: @radius;
 
-.borderRadius-1px:after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    border: 1px solid #e8e8e8;
-    box-sizing: border-box;
-    width: 200%;
-    height: 200%;
-    transform: scale(0.5);
+  &::after {
+    content         : "";
+    position        : absolute;
+    top             : 0;
+    left            : 0;
+    border          : 1px solid @color;
+    border-radius   : calc(@radius * 2);
+    box-sizing      : border-box;
+    width           : 200%;
+    height          : 200%;
+    transform       : scale(0.5);
     transform-origin: left top;
+  }
 }
 
 /* 上边框, 同理可得下 左  右*/
-.scale-1px-top {
-    border: none;
-    position: relative;
-}
+.top-1px(@color: #edeef2) {
+  position: relative;
+  border  : none;
 
-.scale-1px-top:after {
-    content: "";
-    position: absolute;
-    display: block;
-    top: -1px;
-    left: 0;
-    width: 200%;
-    height: 1px;
-    border-bottom: 1px solid #e8e8e8;
-    transform: scale(0.5, 0.5);
-    transform-origin: 0 0;
+  &::before {
+    content         : "";
+    display         : block;
+    width           : 200%;
+    height          : 2px;
+    position        : absolute;
+    top             : 0;
+    left            : 0;
+    right           : 0;
+    background-color: @color;
+    transform-origin: left top;
+    transform       : scale(0.5);
+  }
 }
 
 /* android 文字无法垂直水平居中
