@@ -301,6 +301,8 @@ ios android 均支持scheme协议跳转；
 
 ## 老生常谈，事件循环 EventLoop
 
+[EventLoop详解](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/EventLoop)
+
 ![event loop](https://raw.githubusercontent.com/Nick-QI/pics/master/1597832224340-eventloop.jpeg)
 
 
@@ -309,20 +311,39 @@ ios android 均支持scheme协议跳转；
 
 1. ios 13 版本中无法生成图片，android 和 pc端均正常，将html2canvas版本降级为 "html2canvas": "1.0.0-rc.4"
 
+## 模块化：AMD，CMD，CommonJs，ES6
 
-## AMD 和 CMD
+[主要区别这篇文章已经很详细了](https://juejin.im/post/6844903576309858318)
+
+CommonJs： 服务端使用，同步加载
+
+AMD:：异步加载，依赖前置，提前执行
+
+CMD：异步加载，依赖就近，延迟执行
 
 
 
 ## Sentry 前端报错监控
 
+没啥好讲的，看文档撸
+
+[我是文档](https://docs.sentry.io/)
+
 
 
 ## SSR 给我们带来了什么
 
-优化白屏渲染，增加服务器成本
+SSR（Server Side Render），服务端渲染
 
+#### 优点：单页面seo优化
 
+#### 缺点：增加服务器成本
+
+#### 原理：
+
+#### 	  服务器接收到请求时，将**对应的资源**填充到HTML模板里转化为字符串形式传递给浏览器, 浏览器**解析js后绑定对应事件**就完成了渲染。
+
+#### 	  同构处理，一套代码在服务端和浏览器端均能跑通
 
 
 
@@ -356,7 +377,36 @@ vue3.0； proxy 会在修改之前就进行拦截，还行
 
 :::
 
+## App切后台，我的JS还执行么？？？
 
+哇，好问题，太长时间没写和app相关的webview了。之前写的时候安卓还是7点几的版本。
+
+现在已经是8和9了。ios也上到13的版本了。
+
+::: tip
+
+目前测试下来
+
+|    设备     | 结果（切入后台）                         |
+| :---------: | ---------------------------------------- |
+| 安卓.chrome | 15s左右停止执行                          |
+|  安卓.app   | 一直执行（每个公司都不一样，需要单独测） |
+| ios.safari  | 5s左右停止执行                           |
+|   ios.app   | 立即停止（单独测试）                     |
+
+:::
+
+::: danger
+
+之前在app遇到个情况，ios 13版本中， app的webview 中通过audio 标签播放音频，进入后台，再次进入的时候页面会卡死；
+
+后查，是ios13版本的bug，暂未修复。只能等待。
+
+解决方案是通过jsBridge 来调用app的音频播放。
+
+So sad!
+
+:::
 
 ## 啊哈，微前端，微服务，我究竟是个啥？
 
@@ -367,6 +417,8 @@ vue3.0； proxy 会在修改之前就进行拦截，还行
 
 
 ## 我是真的懒，单元测试写不写
+
+
 
 
 ## PWA香的呀！
