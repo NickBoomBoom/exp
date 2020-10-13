@@ -7,6 +7,47 @@ title: CSS
 1. 常用
 
 ```less
+/* ------------- 样式重置 start ----------------- */
+ * {
+  padding: 0;
+  margin: 0;
+  /* 英文单词自动换行,而不是一行展示*/
+  word-break: break-all;
+  /* 优先以宽度为盒子总宽,即 border + padding + content = width */
+  box-sizing: border-box;
+  /* ios 上点击链接和可点击元素时,会出现一个灰色背景,重置它 */
+  -webkit-tap-highlight-color: transparent;
+  /* ios 开启弹性滑动 */
+  -webkit-overflow-scrolling: touch;
+  /* 清除滚动条 */
+  /* Firefox 64 */
+  scrollbar-width: none;
+  /* IE 11 */
+  -ms-overflow-style: none;
+  overflow: -moz-scrollbars-none;
+}
+
+/* 清除滚动条 */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* 按钮样式重置 */
+button {
+  border: none;
+  outline: none;
+}
+
+/*去掉列表默认排列*/
+ul,
+ol,
+li {
+  list-style: none;
+}
+
+/* ------------- 样式重置 end ------------------- */
+
+/* 省略号展示,可配置 line 行数 */
 .ellipsis(@line: 1) {
   overflow          : hidden;
   /*文字超出用省略号*/
@@ -18,6 +59,7 @@ title: CSS
   -webkit-line-clamp: @line;
 }
 
+/* ------------- flex 布局  start ---------------*/
 .center {
   display        : flex;
   align-items    : center;
@@ -29,7 +71,9 @@ title: CSS
   align-items    : center;
   justify-content: space-between;
 }
+/* -------------- flex 布局  end ----------------*/
 
+/* -------------- 1px线 解决方案 start-----------------*/
 .bottom-1px(@color: #edeef2) {
   position: relative;
   border  : none;
@@ -88,6 +132,10 @@ title: CSS
   }
 }
 
+/* -------------- 1px线 解决方案 end-----------------*/
+
+
+/* -------------- iPhone 全面屏 底部安全距离兼容 start ------------- */
 .bottom(@bottom) when (@bottom > 0) {
   bottom        : calc(@bottom);
   -webkit-bottom: calc(constant(safe-area-inset-bottom)+ @bottom);
@@ -98,6 +146,16 @@ title: CSS
   bottom        : @bottom;
   -webkit-bottom: calc(constant(safe-area-inset-bottom));
   -webkit-bottom: calc(env(safe-area-inset-bottom));
+}
+/* -------------- iPhone 全面屏 底部安全距离兼容 end ------------- */
+
+/* -------------- 浮动 start ---------------- */
+.fl {
+  float: left;
+}
+
+.fr {
+  float: right;
 }
 
 .clearfix {
@@ -115,6 +173,9 @@ title: CSS
     /*让生成的内容不可见*/
   }
 }
+
+/* -------------- 浮动 end ---------------- */
+
 ```
 
 
