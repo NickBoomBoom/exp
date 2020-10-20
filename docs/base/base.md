@@ -1,11 +1,229 @@
 ---
 title: 日常记录
 ---
+## FLIP
+::: tip 前置知识
+  [shuffle动画解析](https://juejin.im/post/6855129005167738893#heading-2)
+
+  [nextTick了解一下](https://juejin.im/post/6844903914068787213)
+:::
+
+::: danger 划重点,默念十遍
+
+**1. dom的更新是实时的。DOM属性的获取不是从RenderTree上获取，而是从DomTree上获取的**
+
+**2. 宏任务 ---> 微任务 ---> GUI渲染**
+
+:::
+
+**FLIP全程为First-Last-Invert-Play, 下面我们来拆读看下**
+
+- **F: First顾名思义就是开始的位置，我们需要在动画开始前记录下节点的开始位置**
+- **L: Last代表结束的位置, 我们同样需要记录下结束的位置，这样我们的运行轨迹就可以通过终始点的位置计算出来**
+- **I: Invert表示回归, 我们将当前节点的位置回归到最初的位置，这样看起来就像是从起点开始运动到终点**
+- **P: Play表示播放，也就是开始从起点往终点运行**
+
+下面结合代码讲解实际过程
+
+```html {35-38,50-56,60-61,63-66,69,76,78-86}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      * {
+        margin: 0;
+        height: 0;
+      }
+      .container {
+        margin: 50px auto;
+        width: 450px;
+        height: 450px;
+        display: flex;
+        flex-wrap: wrap;
+      }
+      .c-random__brand {
+        width: 50px;
+        height: 50px;
+        text-align: center;
+        box-sizing: border-box;
+        line-height: 50px;
+        border: 1px solid #000;
+      }
+      button {
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container"></div>
+    <button onclick="shuffle()">shuffle</button>
+    <script>
+      /* 
+        dom 是实时更新的  dom是实时更新的  dom是实时更新的
+        DOM属性的获取不是从RenderTree上获取，而是从DomTree上获取的
+      */
+      const container = document.getElementsByClassName('container')[0]
+      // 创建dom数组 不需要关注
+      function createBrands() {
+        return [...Array(81).keys()].map(brand => {
+          const div = document.createElement('div')
+          div.innerHTML = brand
+          div.className = 'c-random__brand'
+          return div
+        })
+      }
+      function calculatePlace() {
+        //执行① First 初始赋值
+        brands.forEach(brand => {
+          const { left, top } = brand.getBoundingClientRect()
+          brand.dataset.left = left
+          brand.dataset.top = top
+          brand.style.transition = 'unset'
+        })
+        // 乱序
+        brands.sort((a, b) => Math.random() > .5 ? -1 : 1)
+        // 创建微任务，记住我们的执行顺序，宏任务 ---> 微任务 ---> GUI渲染
+        Promise.resolve().then(() => {
+          // 执行③ 在GUI渲染之前执行
+          brands.forEach(brand => {
+            /*  Last 结束赋值，从dom树中拉取最新dom的定位数据
+            	你可能会疑惑，为什么在GUI渲染之前能拿到位置已经变化的数据呢？？
+            	默念第一条，dom的更新是实时的，dom的更新是实时的，dom的更新是实时的
+            */
+            const { left, top } = brand.getBoundingClientRect()
+            const { left: oldLeft, top: oldTop } = brand.dataset
+            // Invert 回归，回归到变化之前的位置。
+            brand.style.transform = `translate3d(${oldLeft - left}px, ${oldTop - top}px, 0)`
+          })
+        })
+      }
+
+      function patchBrandDom() {
+        // 执行② 塞入dom，因为dom的更新是实时的，所以我们可以在dom树中拿到新的变化位置
+        brands.map(container.appendChild.bind(container))
+        // 执行④ Play dom在invert中回归到变化之前的位置，现在添加动画，重置translate属性即可展示动画效
+        // 不止requestAnimationFrame, setTimeout 也可；开启第二轮渲染
+        requestAnimationFrame(() => {
+          brands.forEach(brand => {
+            const { left, top } = brand.getBoundingClientRect()
+            brand.style.transform = `translate3d(0, 0, 0)`
+            brand.style.transition = 'all .5s'
+          })
+        })
+      }
+
+      function shuffle() {
+        calculatePlace()
+        patchBrandDom()
+      }
+      const brands = createBrands()
+      shuffle()
+    </script>
+  </body>
+</html>
+```
+
+
+
+
+
+<div class='box'>
+  <style>
+    .box {
+      width: 100%;
+      height:450px;
+      display: flex;
+      align-items: center;
+    }
+    .btn {
+      width: 140px;
+      height: 80px;
+      font-size:30px;
+    }
+    .container {
+      margin: 0 auto;
+      width: 450px;
+      height: 450px;
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .c-random__brand {
+      width: 50px;
+      height: 50px;
+      text-align: center;
+      box-sizing: border-box;
+      line-height: 50px;
+      border: 1px solid #000;
+    }
+  </style>
+  <button class='btn' onclick="shuffle()">shuffle</button>
+  <div class="container"></div>
+  <script>
+  /* 
+    dom 是实时更新的  dom是实时更新的  dom是实时更新的
+    DOM属性的获取不是从RenderTree上获取，而是从DomTree上获取的
+    */
+  const container = document.getElementsByClassName('container')[0]
+  function createBrands() {
+    return [...Array(81).keys()].map(brand => {
+      const div = document.createElement('div')
+      div.innerHTML = brand
+      div.className = 'c-random__brand'
+      return div
+    })
+  }
+  function calculatePlace() {
+    // F 初始赋值
+    brands.forEach(brand => {
+      const { left, top } = brand.getBoundingClientRect()
+      brand.dataset.left = left
+      brand.dataset.top = top
+      brand.style.transition = 'unset'
+    })
+    // 乱序
+    brands.sort((a, b) => Math.random() > .5 ? -1 : 1)
+    // 动画
+    Promise.resolve().then(() => {
+      brands.forEach(brand => {
+        // L 从dom树中拉取最新dom的定位数据
+        console.log('L')
+        const { left, top } = brand.getBoundingClientRect()
+        const { left: oldLeft, top: oldTop } = brand.dataset
+        // I 回归到原始位置
+        console.log('I', oldLeft, left, oldTop, top)
+        brand.style.transform = `translate3d(${oldLeft - left}px, ${oldTop - top}px, 0)`
+      })
+    })
+  }
+  function patchBrandDom() {
+    // P
+    console.log('P before')
+    // 塞入dom
+    brands.map(container.appendChild.bind(container))
+    requestAnimationFrame(() => {
+      console.log('P')
+      brands.forEach(brand => {
+        const { left, top } = brand.getBoundingClientRect()
+        brand.style.transform = `translate3d(0, 0, 0)`
+        brand.style.transition = 'all .5s'
+      })
+    })
+  }
+  function shuffle() {
+    calculatePlace()
+    patchBrandDom()
+  }
+  const brands = createBrands()
+  shuffle()
+  </script>
+</div> 
 
 
 ## 禁止字体跟随系统字体大小
 
-### 即，固定字体大小
+#### (即，固定字体大小,不随系统字体大小变化)
 
 1. IOS
 
