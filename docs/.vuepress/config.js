@@ -11,6 +11,7 @@ module.exports = {
     // sidebarDepth: 2,
     sidebar: {
       '/base/': [
+        'outline',
         'base',
         'html',
         'css',
