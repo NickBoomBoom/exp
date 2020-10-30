@@ -66,7 +66,7 @@ class MyDialog extends HTMLElement {
 		// 自身属性被增删改查时调用 
   }
 }
-window.customeElements.define('my-dialog', MyDialog)
+window.customElements.define('my-dialog', MyDialog)
 
 // 如果你想指定特定的 dom 类型，可通过下段代码找到所有的衍生
 {
