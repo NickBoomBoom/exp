@@ -626,6 +626,69 @@ So sad!
 
 :::
 
+## addEventListener passive 优化（划重点）
+
+::: tip 前置知识
+
+[MDN addEventListener](https://developer.mozilla.org/zh-CN/docs/Web/API/EventTarget/addEventListener)
+
+[passive 改善性能，有点晦涩](https://developer.mozilla.org/zh-CN/docs/Web/API/EventTarget/addEventListener#%E4%BD%BF%E7%94%A8_passive_%E6%94%B9%E5%96%84%E7%9A%84%E6%BB%9A%E5%B1%8F%E6%80%A7%E8%83%BD)
+
+:::
+
+​		当你触摸滑动页面时，页面应该跟随手指一起滚动。而此时你绑定了一个 touchstart 事件，你的事件大概执行 200 毫秒。这时浏览器就犯迷糊了：如果你在事件绑定函数中调用了 preventDefault，那么页面就不应该滚动，如果你没有调用 preventDefault，页面就需要滚动。但是你到底调用了还是没有调用，浏览器不知道。只能先执行你的函数，等 200 毫秒后，绑定事件执行完了，浏览器才知道，“哦，原来你没有阻止默认行为，好的，我马上滚”。此时，页面开始滚。
+
+这样下来，在使用者看来，画面会有一定量的阻塞。特别明显。
+
+所以，在日常编写代码的时候，必须加上passive 来处理。
+
+```javascript
+div.addEventListener(
+  'scroll', 
+  function(e){
+		// dosomething
+	},
+  {
+    capture: false,
+    once: false, // 表示listener在添加之后最多只调用一次。true 表示在其
+    passive: true // 设置为true时，表示 `listener` 永远不会调用 `preventDefault()`
+  }
+)
+```
+
+当然，以上是理想状况，大部分时候，还是要预先检测是否支持。
+
+:::danger 注意
+
+那些不支持参数`options`的浏览器，会把第三个参数默认为`useCapture`，即设置`useCapture`为true
+
+:::
+
+上polyfill（就很机智）
+
+`**Object.defineProperty()**` 方法会直接在一个对象上定义一个新属性，或者修改一个对象的现有属性， 并返回这个对象。
+
+```javascript
+/* Feature detection */
+/*特诊检测*/
+var passiveIfSupported = false;
+
+try {
+  window.addEventListener(
+    "test", 
+    null, 
+    Object.defineProperty({}, "passive", { get: function() { passiveIfSupported = { passive: true }; } }));
+} catch(err) {}
+
+window.addEventListener('scroll', function(event) {
+  /* do something */
+  // can't use event.preventDefault();
+  // 不能使用event.prevebt.
+}, passiveIfSupported );
+```
+
+
+
 ## 啊哈，微前端，微服务，我究竟是个啥？
 
 
