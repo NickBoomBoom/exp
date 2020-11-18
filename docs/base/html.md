@@ -62,7 +62,7 @@ class MyDialog extends HTMLElement {
 		// dom被移动到新文档时调用
   }
   
-  attributeChangeedCallback() {
+  attributeChangedCallback() {
 		// 自身属性被增删改查时调用 
   }
 }
