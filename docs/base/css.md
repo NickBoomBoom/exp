@@ -349,3 +349,19 @@ globalRootStyle.innerHTML = `
 `
 document.documentElement.firstElementChild.appendChild(globalRootStyle)
 ```
+
+##  css(id,类名等)的优先级
+按权重:  
+ !import > 内联样式(1000) > id(100) > 类,伪类,属性选择器(10) > 标签,伪元素(10) > 通配符(0)
+
+括号内携带的是 他的权重值,但是不代表, 权重叠加后大于前一级的情况,即
+
+```css
+/* 实际上还是id 优先级高 */
+.a.d.c.f.g.h.j.k.l.q.w.e.r.y.u.i {  // 20个类名,权重 20*10 = 200 
+  color: red;
+}
+#id{   // 权重 100;
+  color: blue;  
+}
+```
