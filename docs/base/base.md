@@ -1,7 +1,362 @@
 ---
 title: 日常记录
 ---
+## 重绘Reflow和回流Repaint
+
+[详解](https://juejin.cn/post/6844903569087266823)
+
+#### 重绘Reflow
+
+​	当页面中元素样式的改变并不影响它在文档流中的位置时，浏览器会将新样式赋予元素并重绘它
+
+#### 回流Repaint
+
+​	元素的尺寸，结构，或某些属性发生改变的时候，浏览器重新渲染部分或全部文档的过程。
+
+​	会导致回流的操作：
+
+- 页面首次渲染
+- 浏览器窗口大小发生改变
+- 元素尺寸或位置发生改变
+- 元素内容变化
+- 元素字体大小变化
+- 增删可见元素
+- 激活CSS伪类
+- 查询某些属性或调用某些方法
+
+#### 影响
+
+**回流比重绘代价高**
+
+#### 浏览器优化
+
+前置：浏览器会维护一个队列，将回流和重绘操作放入队列中，当队列任务数量到达一个阈值时，队列清空，进行一次批处理，这样把多次回流和重绘编程一次。
+
+#### 如何避免
+
+css：
+
+- 避免使用table布局
+- dom树最末端改变class
+- 避免设置多层内联样式
+- 将动画效果应用到absolute或fixed元素上，脱离图层
+- 避免使用CSS表达式（calc()）
+
+JavaScript：
+
+- 避免频繁操作样式，一次重写样式
+- 避免频繁操作dom，使用 [documentFragment](https://developer.mozilla.org/zh-CN/docs/Web/API/DocumentFragment)
+- 设置display:none；操作结束后显示出来，display属性为none的元素上进行DOM操作不会触发重绘和回流
+- 频繁读取会引发回流、重绘，如果需要多次使用，用变量缓存起来
+- 对具有复杂动画的元素使用绝对定位，脱离文档流。避免影响到父元素和相邻元素
+
+
+
+## BFC格式化上下文
+
+[BFC详解](https://juejin.cn/post/6844904166477955080)
+
+[BFC简析](https://juejin.cn/post/6898278714312753159#heading-1)
+
+BFC 块级格式化上下文，目前碰到的所有BFC情况原因都是 **内部元素在同一个BFC里面导致的问题**；
+
+### 特性：
+
+1. Box垂直方向的距离由margin决定，属于同一个BFC的两个相邻box的margin会发生重叠
+2. BFC的区域不会与float box 发生重叠；
+3. 计算BFC的高度时，浮动元素也参与计算
+4. BFC内部的Box会在垂直方向上，一个接一个的放置
+5. 每个元素的margin box的左边会与包含块border box的左边相接触（对于从左到右的格式化，否则相反），即使存在浮动也是如此
+6. BFC独立容器，容器里面的元素不会影响到外部元素
+
+### 问题：同一个BFC中元素的排列出现问题；将出问题的Box 触发BFC，使其关联断开
+
+### 解决（即触发BFC）：
+
+1. 根元素（HTML）
+
+2. float的值不为none
+
+3. overflow的值不为visible
+
+4. diaplay的值为inline-block/flex/inline-flex/table-cell/table-caption/flow-root（[flow-root支持有限](https://caniuse.com/?search=flow-root)）
+
+5. position的值为absolute/fixed
+
+   
+
+
+## Express和Koa的中间件原理
+
+```javascript
+/* 
+	Express 中间件原理
+*/
+class Express {
+  constructor() {
+    this.routes = {
+      all: [],
+      get: [],
+      post: []
+    }
+  }
+  register(path) {
+    const info = {}
+    if (typeof path === 'string') {
+      info.path = path
+      info.stack = slice.call(arguments, 1)
+    } else {
+      info.path = '/'
+      info.stack = slice.call(arguments, 0)
+    }
+    return info
+  }
+  use() {
+    const info = this.register.apply(this, arguments)
+    this.routes.all.push(info)
+  }
+  get() {
+    const info = this.register.apply(this, arguments)
+    this.routes.get.push(info)
+  }
+  post() {
+    const info = this.register.apply(this, arguments)
+    this.routes.post.push(info)
+  }
+  handle(req, res, stack) {
+    // next 核心代码；
+    const next = () => {
+      const middleware = stack.shift()
+      if (middleware) {
+        middleware(req, res, next)
+      }
+    }
+    next()
+  }
+  match(method, url) {
+    let stack = []
+    if (url === '/favicon.ico') {
+      return stack
+    }
+    let curRoutes = []
+    curRoutes = curRoutes.concat(this.routes.all)
+    curRoutes = curRoutes.concat(this.routes[method])
+
+    curRoutes.forEach(item => {
+      if (url.indexOf(item.path) === 0) {
+        stack = stack.concat(item.stack)
+      }
+    })
+    return stack
+  }
+  callback() {
+    return (req, res) => {
+      res.json = data => {
+        res.setHeader('Content-type', 'application/json')
+        res.end(JSON.stringify(data))
+      }
+      const url = req.url
+      const method = req.method.toLowerCase()
+      const resultList = this.match(method, url)
+      this.handle(req, res, resultList)
+    }
+  }
+  listen(...args) {
+    const server = http.createServer(this.callback())
+    server.listen(...args)
+
+  }
+}
+
+
+/* Koa 中间件原理，洋葱模型*/
+// 组合中间件 
+function compose(middlewareList) {
+  return ctx => {
+    function dispatch(i) {
+      const fn = middlewareList[i]
+      try {
+        // 返回一个promise,无论传过来的fn是否为promise,包一层,确保每次返回的都是promise
+        return Promise.resolve(
+          fn(ctx, dispatch.bind(null, i + 1))
+        )
+      } catch (err) {
+        return Promise.reject(err)
+      }
+    }
+    return dispatch(0)
+  }
+}
+class Koa {
+  constructor() {
+    this.middleware = []
+  }
+  use(fn) {
+    this.middleware.push(fn)
+    return this
+  }
+  createContext(req, res) {
+    const ctx = {
+      req, res
+    }
+    ctx.query = req.query
+    return ctx
+  }
+  handleRequest(ctx, fn) {
+    return fn(ctx)
+  }
+  callback() {
+    const fn = compose(this.middlewareList)
+    return (req, res) => {
+      const ctx = createContext(req, res)
+      return this.handleRequest(ctx, fn)
+    }
+  }
+  listen(...args) {
+    const server = http.createServer(this.callback())
+    server.listen(...args)
+  }
+}
+
+```
+
+
+
+## 人人都会深拷贝，但是深拷贝循环引用怎么办
+
+```javascript
+
+/* 
+	深拷贝 1 	JSON 转化
+	弊端：
+			undefined 会被转化为 ‘undefined’
+			function 无法转化
+*/
+JSON.parse(JSON.stringify(obj))
+
+/*
+	深拷贝 2  递归判断返回；需要解决内部 循环引用
+*/
+function clone(target, map = new Map()) {
+    if (typeof target === 'object') {
+      	// 判断数组和对象
+        let cloneTarget = Array.isArray(target) ? [] : {};
+      	// 在map中查找是否存有
+        if (map.get(target)) {
+            return map.get(target);
+        }
+      	// 存储当前对象和克隆对象的对应关系
+        map.set(target, cloneTarget);
+        for (const key in target) {
+            cloneTarget[key] = clone(target[key], map);
+        }
+        return cloneTarget;
+    } else {
+        return target;
+    }
+};
+// ps: 还需要考虑其他情况，RegExp，function，Set，weakSet，Map，weakMap，Symbol等
+
+
+```
+
+
+
+## GC（垃圾回收机制）
+
+[**直接点击学习**](https://zhuanlan.zhihu.com/p/103110917)
+
+
+
+## 闭包与GC（垃圾回收机制）
+
+```javascript
+/*
+	闭包： 函数内部返回一个函数，该函数中引用了父级函数中的值，使其变量常驻内存，不被垃圾回收机制回收；
+	使用场景：
+		目前我所使用的场景，只有在 每次发出请求，header中需要携带token信息的时候会将获取token的函数写成闭包；
+		还有在当前变量数据在 70% 以上页面都会用到的时候，写成闭包；
+	弊端：
+		变量常驻内存，对内存消耗大。（在退出函数之前，将不使用的变量清除）
+		ps: 现在机器性能如此过剩的时代，内存溢出的情况应该会很少见吧
+*/
+function getToken() {
+	let token = 'kkkkkk'
+	return () => token
+}
+let token = getToken()
+// 使用
+token()
+// 清除
+token = null
+```
+
+**我的理解：**
+
+**第一层：闭包就是能够读取其他函数内部变量的函数，也是将函数内部和函数外部连接起来的桥梁**
+
+**第二层：闭包引用的变量常驻内存，垃圾回收机制不会清除它**
+
+## 自适应布局方案（rem,vw）
+
+::: tip
+
+[前置知识](https://juejin.cn/post/6867874227832225805#heading-11)
+
+:::
+
+### rem是什么
+
+​	rem 是指相对于根元素来做计算的字体大小单位
+
+::: tip rem的实质：
+
+**等比缩放**
+
+```javascript
+/* 
+	designWidth: 设计稿宽度
+	maxWidth： 	最大宽度
+*/
+function setRem(designWidth, maxWidth) {
+  // 获取设备独立像素
+	let clientWidth = document.documentElement.getBoundingClientRect().width
+  if (clientWidth > maxWidth) {
+    clientWidth = maxWidth
+  }
+  // 100 是px与rem的转换比例。100 比较好算
+	const rem = (clientWidth * 100) / designWidth
+	document.documentElement.style.fontSize = rem + 'px'
+}
+
+// 这样的话，rem * designWidth / 100  = clientWidth；
+// 这就是我们每次计算px需要换算的原因了。
+
+
+```
+
+:::
+
+### vw是什么
+
+​	vw是基于viewport视窗的长度单位。1vw等于window.innerWidth的1%
+
+### dpr是什么
+
+​	设备像素比，即物理像素和设备独立像素的比值。**dpr = 物理像素 / 设备独立像素**
+
+​	在浏览器中通过**window.devicePixelRatio**来获取dpr
+
+​	**iPhone6，7，8**的物理像素是**750*1334**，设备独立像素是**375*667**。dpr就是 750 / 375 = 2。
+
+::: tip 1px问题
+
+​		因为dpr的存在，导致border:1px（1px描述的是设备独立像素），所以border被放大到物理像素1px * 2 = 2px（设备独立像素 * dpr = 实际渲染物理像素）显示
+
+:::
+
 ## FLIP
+
 ::: tip 前置知识
   [shuffle动画解析](https://juejin.im/post/6855129005167738893#heading-2)
 
@@ -521,7 +876,231 @@ ios android 均支持scheme协议跳转；
 
 [EventLoop详解](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/EventLoop)
 
+### 浏览器端：
+
+1.执行一个宏任务（栈中没有就从事件队列中获取）；
+2.执行过程中如果遇到微任务，就将它添加到微任务队列中；
+3.宏任务执行完毕后，立即执行当前微任务队列中的所有微任务（依次执行）；
+4.当前宏任务执行完毕，开始检查渲染，然后GUI线程接管渲染；
+5.渲染完毕后，JS线程继续接管，开始下一个宏任务（就从事件队列中获取）
+
 ![event loop](https://raw.githubusercontent.com/Nick-QI/pics/master/1597832224340-eventloop.jpeg)
+
+
+
+## 讲完EventLoop，再讲promise就能清楚了
+
+```javascript
+
+ const PENDING = 'PENDING';
+      const RESOLVED = 'RESOLVED';
+      const REJECTED = 'REJECTED';
+
+      function resolvePromise(promise2, x, resolve, reject) {
+        // 1)不能引用同一个对象 可能会造成死循环
+        if (promise2 === x) {
+          return reject(new TypeError('[TypeError: Chaining cycle detected for promise #<Promise>]----'));
+        }
+        let called;// promise的实现可能有多个，但都要遵循promise a+规范，我们自己写的这个promise用不上called,但是为了遵循规范才加上这个控制的，因为别人写的promise可能会有多次调用的情况。
+        // 2)判断x的类型，如果x是对象或者函数，说明x有可能是一个promise，否则就不可能是promise
+        if ((typeof x === 'object' && x != null) || typeof x === 'function') {
+          // 有可能是promise promise要有then方法
+          try {
+            // 因为then方法有可能是getter来定义的, 取then时有风险，所以要放在try...catch...中
+            // 别人写的promise可能是这样的
+            // Object.defineProperty(promise, 'then', {
+            // 	get() {
+            // 		throw new Error();
+            // 	}
+            // })
+            let then = x.then;
+            if (typeof then === 'function') { // 只能认为他是promise了
+              // x.then(()=>{}, ()=>{}); 不要这么写，以防以下写法造成报错， 而且也可以防止多次取值
+              // let obj = {
+              // 	a: 1,
+              // 	get then() {
+              // 		if (this.a++ == 2) {
+              // 			throw new Error();
+              // 		}
+              // 		console.log(1);
+              // 	}
+              // }
+              // obj.then;
+              // obj.then
+
+              // 如果x是一个promise那么在new的时候executor就立即执行了，就会执行他的resolve，那么数据就会传递到他的then中
+              then.call(x, y => {// 当前promise解析出来的结果可能还是一个promise, 直到解析到他是一个普通值
+                if (called) return;
+                called = true;
+                resolvePromise(promise2, y, resolve, reject);// resolve, reject都是promise2的
+              }, r => {
+                if (called) return;
+                called = true;
+                reject(r);
+              });
+            } else {
+              // {a: 1, then: 1} 
+              resolve(x);
+            }
+          } catch (e) {// 取then出错了 有可能在错误中又调用了该promise的成功或则失败
+            if (called) return;
+            called = true;
+            reject(e);
+          }
+        } else {
+          resolve(x);
+        }
+      }
+
+
+      class Promise {
+        constructor(executor) {
+          this.status = PENDING; // 宏变量, 默认是等待态
+          this.value = undefined; // then方法要访问到所以放到this上
+          this.reason = undefined; // then方法要访问到所以放到this上
+          this.onResolvedCallbacks = [];// 专门存放成功的回调函数
+          this.onRejectedCallbacks = [];// 专门存放成功的回调函数
+          let resolve = (value) => {
+            if (value instanceof Promise) {
+              value.then(resolve, reject);
+              return;
+            }
+            if (this.status === PENDING) {
+              this.value = value;
+              this.status = RESOLVED;
+              this.onResolvedCallbacks.forEach(fn => fn());// 需要让成功的方法依次执行
+            }
+          };
+          let reject = (reason) => {
+            if (this.status === PENDING) {
+              this.reason = reason;
+              this.status = REJECTED;
+              this.onRejectedCallbacks.forEach(fn => fn());// 需要让失败的方法依次执行
+            }
+          };
+          // 执行executor传入我们定义的成功和失败函数:把内部的resolve和reject传入executor中用户写的resolve, reject
+          try {
+            executor(resolve, reject);
+          } catch (e) {
+            reject(e);//如果内部出错 直接将error手动调用reject向下传递
+          }
+        }
+        then(onfulfilled, onrejected) {
+          onfulfilled = typeof onfulfilled === 'function' ? onfulfilled : v => v;
+          onrejected = typeof onrejected === 'function' ? onrejected : error => { throw error };
+          let promise2 = new Promise((resolve, reject) => {
+            if (this.status === RESOLVED) {
+              setTimeout(() => {
+                try {
+                  let x = onfulfilled(this.value);
+                  resolvePromise(promise2, x, resolve, reject);
+                } catch (e) {
+                  console.log(e);
+                  reject(e);
+                }
+              }, 0);
+            }
+            if (this.status === REJECTED) {
+              setTimeout(() => {
+                try {
+                  let x = onrejected(this.reason);
+                  resolvePromise(promise2, x, resolve, reject);
+                } catch (e) {
+                  reject(e);
+                }
+              }, 0);
+            }
+            if (this.status === PENDING) {
+              this.onResolvedCallbacks.push(() => {
+                setTimeout(() => {
+                  try {
+                    let x = onfulfilled(this.value);
+                    resolvePromise(promise2, x, resolve, reject);
+                  } catch (e) {
+                    reject(e);
+                  }
+                }, 0);
+              });
+              this.onRejectedCallbacks.push(() => {
+                setTimeout(() => {
+                  try {
+                    let x = onrejected(this.reason);
+                    resolvePromise(promise2, x, resolve, reject);
+                  } catch (e) {
+                    reject(e);
+                  }
+                }, 0);
+              });
+            }
+          });
+
+          return promise2;
+        }
+        catch(errCallback) {
+          return this.then(null, errCallback);
+        }
+        resolve(value) {
+          return new Promise((resolve, reject) => {
+            resolve(value);
+          })
+        }
+        reject(value) {
+          return new Promise((resolve, reject) => {
+            reject(value);
+          })
+        }
+        all(promises) {
+          return new Promise((resolve, reject) => {
+            let result = [];
+            let len = promises.length;
+            if (len === 0) {
+              resolve(result);
+              return;
+            }
+            const handleData = (data, index) => {
+              result[index] = data;
+              // 最后一个 promise 执行完
+              if (index == len - 1) resolve(result);
+            }
+            for (let i = 0; i < len; i++) {
+              // 为什么不直接 promise[i].then, 因为promise[i]可能不是一个promise
+              Promise.resolve(promise[i]).then(data => {
+                handleData(data, i);
+              }).catch(err => {
+                reject(err);
+              })
+            }
+          })
+        }
+        race(promises) {
+          return new Promise((resolve, reject) => {
+            let len = promises.length;
+            if (len === 0) return;
+            for (let i = 0; i < len; i++) {
+              Promise.resolve(promise[i]).then(data => {
+                resolve(data);
+                return;
+              }).catch(err => {
+                reject(err);
+                return;
+              })
+            }
+          })
+        }
+      }
+      Promise.prototype.finally = function (callback) {
+        this.then(value => {
+          return Promise.resolve(callback()).then(() => {
+            return value;
+          });
+        }, error => {
+          return Promise.resolve(callback()).then(() => {
+            throw error;
+          });
+        });
+      }
+
+```
 
 
 
