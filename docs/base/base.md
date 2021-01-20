@@ -1,11 +1,44 @@
 ---
 title: 日常记录
 ---
+## 进制初识
+
+::: tip
+
+[前置](https://www.zhihu.com/question/23131605/answer/142989017)
+
+:::
+
+```javascript
+// 2进制到36进制之间的转换
+function baseConverter(decNumber, base) { 
+   const remStack = []
+   const digits = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'; 
+   let number = decNumber; 
+   let rem; 
+   if (!(base >= 2 && base <= 36)) { 
+   	return ''; 
+   } 
+   while (number > 0) { 
+     rem = Math.floor(number % base); 
+     remStack.push(rem); 
+     number = Math.floor(number / base); 
+   }
+   return remStack.reduceRight((acc, cur) => acc += digits[cur], '')
+}
+```
+
+
+
 ## 重绘Reflow和回流Repaint
+
+::: tip
 
 [详解](https://juejin.cn/post/6844903569087266823)
 
 [知识集](https://www.zhoulujun.cn/html/webfront/browser/webkit/2016_0506_7820.html)
+
+:::
 
 #### 重绘Reflow
 
@@ -56,9 +89,13 @@ JavaScript：
 
 ## BFC格式化上下文
 
+::: tip
+
 [BFC详解](https://juejin.cn/post/6844904166477955080)
 
 [BFC简析](https://juejin.cn/post/6898278714312753159#heading-1)
+
+:::
 
 BFC 块级格式化上下文，目前碰到的所有BFC情况原因都是 **内部元素在同一个BFC里面导致的问题**；
 
@@ -894,7 +931,7 @@ ios android 均支持scheme协议跳转；
 
 ```javascript
 
- const PENDING = 'PENDING';
+ 			const PENDING = 'PENDING';
       const RESOLVED = 'RESOLVED';
       const REJECTED = 'REJECTED';
 
