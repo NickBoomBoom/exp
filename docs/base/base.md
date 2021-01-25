@@ -1151,11 +1151,19 @@ ios android 均支持scheme协议跳转；
 
 [主要区别这篇文章已经很详细了](https://juejin.im/post/6844903576309858318)
 
+[这篇也总结了](https://juejin.cn/post/6920773247948554248)
+
 CommonJs： 服务端使用，同步加载
 
 AMD:：异步加载，依赖前置，提前执行
 
 CMD：异步加载，依赖就近，延迟执行
+
+- CommonJS模块是运行时加载，ES6模块是编译时输出接口
+- CommonJS模块输出的是一个值的复制，ES6模块输出的是值的引用
+- CommonJS加载的是整个模块，即将所有的方法全部加载进来，ES6可以单独加载其中的某个方法
+- CommonJS中`this`指向当前模块`module.exports`，ES6中`this`指向undefined
+- CommonJS默认非严格模式，ES6的模块自动采用严格模式
 
 
 
