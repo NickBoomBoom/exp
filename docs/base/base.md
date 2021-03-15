@@ -1,6 +1,20 @@
 ---
 title: 日常记录
 ---
+## 原型
+
+::: tip
+
+[详解](https://github.com/KieSun/Dream/issues/2)
+
+:::
+
+## 继承
+
+
+
+
+
 ## 进制初识
 
 ::: tip

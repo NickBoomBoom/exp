@@ -15,8 +15,9 @@ module.exports = {
         'base',
         'html',
         'css',
+        'ts',
         'react',
-        'hobby'
+        'hobby',
       ],
     }
   },
