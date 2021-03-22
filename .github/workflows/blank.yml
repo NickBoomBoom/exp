@@ -15,5 +15,5 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           TARGET_REPO: Nick-QI/nick-qi.github.io
           TARGET_BRANCH: master
-          BUILD_SCRIPT: yarn && yarn build && echo "exp.chenqi.fun" > ./CNAME
+          BUILD_SCRIPT: yarn && yarn build && echo "exp.chenqi.fun" > docs/.vuepress/dist/CNAME
           BUILD_DIR: docs/.vuepress/dist/
